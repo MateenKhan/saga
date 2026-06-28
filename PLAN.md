@@ -1,0 +1,130 @@
+# 🗺️ Master Cloud Engineering Runbook (`PLAN.md`)
+
+This master runbook outlines the exact sequence to register, configure, structure, and deploy a high-throughput, transaction-safe Fraud Processing Engine and distributed Saga orchestrator on **Render** for free.
+
+---
+
+## 🧭 PHASE 1: External Platform Registrations
+Execute these steps before setting up your infrastructure or writing code.
+
+1. **GitHub Account Setup:**
+   * Go to [github.com](https://github.com) and register a free developer account.
+   * Create **Repository 1**: Name it `fraud-processing-engine` (Mark as Private or Public).
+   * Create **Repository 2**: Name it `temporal-infra-cluster` (Mark as Private or Public).
+2. **Render Account Setup:**
+   * Go to [render.com](https://render.com) and click **Sign Up**.
+   * Select **Sign up with GitHub** to link your source code repository permissions automatically.
+
+---
+
+## 📁 PHASE 2: Codebase Directory Trees & File Enclosures
+Create the exact folder structures and file headers inside your local workspace repositories before provisioning resources.
+
+### Repository 1: `fraud-processing-engine`
+```text
+fraud-processing-engine/
+├── pom.xml                                   # Dependency Management Descriptor
+├── Dockerfile                                # Multi-Stage Production Java Compiler
+└── src/
+    └── main/
+        └── java/
+            └── com/
+                └── enterprise/
+                    └── architecture/
+                        ├── config/
+                        │   └── KafkaConsumerConfig.java     # Project Loom Thread Config
+                        ├── security/
+                        │   ├── EncryptionUtil.java          # AES-256 GCM Logic Core
+                        │   └── TemporalDataConverter.java   # Cryptographic Payload Interceptor
+                        ├── components/
+                        │   └── FraudValidationProcessor.java# Resilience4j Consumer Listener
+                        └── saga/
+                            ├── OrderSagaWorkflow.java       # Orchestrated Workflow Interface
+                            ├── OrderSagaWorkflowImpl.java   # Deterministic Replay Logic
+                            ├── InventoryActivities.java     # Task Execution Interface
+                            └── InventoryActivitiesImpl.java # Idempotency State Execution
+```
+
+### Repository 2: `temporal-infra-cluster`
+```text
+temporal-infra-cluster/
+├── Dockerfile                                # Pre-compiled Temporal Engine Puller
+└── schema-migration.sh                       # PostgreSQL Database Table Bootstrapper
+```
+
+---
+
+## 🛠️ PHASE 3: Step-by-Step Cloud Environment Provisioning
+
+### 🗄️ Step 1: Deploy the Shared Persistence Layer (PostgreSQL)
+1. Navigate to your **Render Dashboard**, click **New +** in the top right, and select **PostgreSQL**.
+2. Input the exact values:
+   * **Name:** `temporal-persistence-db`
+   * **Database Name:** `temporal`
+   * **User:** `temporal_admin`
+   * **Instance Type:** Select **Free**
+3. Click **Create Database**.
+4. Wait for status **Available**. Scroll down to **Connections** and copy the value for **Internal Database URL**.
+
+### ⏱️ Step 2: Provision the Central Temporal Orchestrator Server
+1. Click **New +** on the Render dashboard and select **Web Service**.
+2. Select your linked **`temporal-infra-cluster`** repository.
+3. Input the parameters:
+   * **Name:** `temporal-central-server`
+   * **Runtime:** Select **Docker**.
+   * **Instance Type:** Select **Free**.
+4. Open **Environment Variables** and add:
+   * `DB` = `postgres`
+   * `POSTGRES_SEEDS` = `[Paste the Internal Database URL copied in Step 1]`
+5. Click **Create Web Service**.
+
+### ⚡ Step 3: Deploy the Stream Pipeline (Apache Kafka)
+1. Click **New +** on the dashboard and select **Web Service**.
+2. Select **Build from a Docker Image** and type: `ubuntu/kafka:latest`
+3. Input the parameters:
+   * **Name:** `kafka-cluster-broker`
+   * **Instance Type:** Select **Free**.
+4. Open **Environment Variables** and add:
+   * `KAFKA_LISTENER_SECURITY_PROTOCOL_MAP` = `INTERNAL:PLAINTEXT`
+   * `KAFKA_LISTENERS` = `INTERNAL://0.0.0.0:9042`
+   * `KAFKA_ADVERTISED_LISTENERS` = `INTERNAL://kafka-cluster-broker:9042`
+5. Click **Create Web Service**.
+
+### ☕ Step 4: Boot the Java Spring Boot Processing Engine
+1. Click **New +** on the dashboard and select **Web Service**.
+2. Select your linked **`fraud-processing-engine`** repository.
+3. Input the parameters:
+   * **Name:** `fraud-evaluation-service`
+   * **Runtime:** Select **Docker**.
+   * **Instance Type:** Select **Free**.
+4. Open **Environment Variables** and add:
+   * `KAFKA_BOOTSTRAP_SERVERS` = `kafka-cluster-broker:9042`
+   * `TEMPORAL_SERVER_ADDRESS` = `temporal-central-server:7233`
+5. Click **Create Web Service**.
+
+---
+
+## 🚀 PHASE 4: Local Git & Execution Commands
+
+### Local Code Setup & Synchronization
+Execute these terminal commands inside your local project machine to commit changes and trigger automated cloud builds on Render:
+
+```bash
+# 1. Initialize and Push Infrastructure Cluster (Repository 2)
+cd path/to/temporal-infra-cluster
+git init
+git add .
+git commit -m "feat: infrastructure deployment core"
+git remote add origin https://github.comyour-username/temporal-infra-cluster.git
+git branch -M main
+git push -u origin main
+
+# 2. Initialize and Push Spring Boot Processing Engine (Repository 1)
+cd path/to/fraud-processing-engine
+git init
+git add .
+git commit -m "feat: system business logic and loom consumers"
+git remote add origin https://github.comyour-username/fraud-processing-engine.git
+git branch -M main
+git push -u origin main
+```
