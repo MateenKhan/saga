@@ -3,10 +3,6 @@ FROM apache/kafka:3.7.0
 
 USER root
 
-# Install standard netcat utility to drive our free-tier port scan responder loops
-# Using the standard Red Hat micro package manager since this image relies on UBI
-RUN microdnf update && microdnf install -y nc && microdnf clean all
-
 # Copy the execution script into the container workspace
 COPY schema-migration.sh /usr/local/bin/schema-migration.sh
 

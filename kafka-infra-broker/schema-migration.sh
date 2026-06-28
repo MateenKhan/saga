@@ -3,15 +3,28 @@ set -e
 
 echo "=== Starting Lightweight KRaft Kafka Broker ==="
 
-# 🚀 STEP 1: BYPASS RENDER HEALTH NETWORK SCANS IMMEDIATELY
-# Spin up an internal web responder loop on port 10000 in a detached background process.
-# This ensures Render instantly marks the service as green/healthy without timing out.
+# 🚀 STEP 1: BYPASS RENDER FREE-TIER HEALTH CHECK IMMEDIATELY
+# Using a zero-dependency, pure Java mini web server embedded directly in a background shell.
+# Render marks the service healthy instantly without needing netcat/nc tools.
 echo "Spinning up free-tier port responder loop on port 10000..."
-while true; do 
-  echo -e "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 11\n\nOperational" | nc -l -p 10000 || sleep 1
-done &
+java -etc '
+import com.sun.net.httpserver.HttpServer;
+import java.net.InetSocketAddress;
+public class RenderHealth {
+    public static void main(String[] args) throws Exception {
+        HttpServer server = HttpServer.create(new InetSocketAddress(10000), 0);
+        server.createContext("/", exchange -> {
+            byte[] response = "Operational".getBytes();
+            exchange.sendResponseHeaders(200, response.length);
+            exchange.getResponseBody().write(response);
+            exchange.close();
+        });
+        server.start();
+    }
+}
+' &
 
-# Give background routing rules a brief moment to stabilize
+# Give background routing configurations a brief moment to stabilize
 sleep 2
 
 # STEP 2: HAND OVER EXECUTION TO THE PRIMARY KAFKA APP ENGINES

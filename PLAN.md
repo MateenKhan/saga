@@ -43,7 +43,7 @@ Execute these steps before setting up your infrastructure or writing code.
    * **Docker Build Context Directory** = `temporal-infra-cluster/.`
 5. Click **Create Web Service**.
 
-### ⚡ Step 3: Deploy the Stream Pipeline (Apache Kafka)
+### ⚡ Step 4: Deploy the Stream Pipeline (Apache Kafka)
 1. Click **New +** on the dashboard and select **Web Service**.
 2. Select **Build from a Docker Image** and type: `ubuntu/kafka:latest`
 3. Input the parameters:
@@ -52,9 +52,27 @@ Execute these steps before setting up your infrastructure or writing code.
    * **Dockerfile Path** = `Dockerfile`
 4. Click **Create Web Service**.
 
-### ☕ Step 4: Boot the Java Spring Boot Processing Engine
+### ☕ Step 5: Boot the Java Spring Boot Processing Engine
 1. Click **New +** on the dashboard and select **Web Service**.
 2. Select your linked **`fraud-processing-engine`** repository.
+3. Input the parameters:
+   * **Name:** `fraud-evaluation-service`
+   * **Root Directory:** `fraud-evaluation-service`
+   * **Runtime:** Select **Docker**.
+   * **Instance Type:** Select **Free**.
+   * **Advanced -> Dockerfile Path:** Select **Dockerfile**.
+4. Open **Environment Variables** and add:
+   * `KAFKA_BOOTSTRAP_SERVERS` = `kafka-cluster-broker:9042`
+   * `TEMPORAL_SERVER_ADDRESS` = `temporal-central-server:7233`
+   * `DB_URL` = `jdbc:postgresql://dpg-d909ol8k1i2s73ffl560-`
+   
+5. Click **Create Web Service**.
+
+---
+
+### ☕ Step 6: Logs
+1. * Go to [grafana.com](https://grafana.com/) and click **Sign Up**.
+2. new datasource -> prometheus -> addnew datasource
 3. Input the parameters:
    * **Name:** `fraud-evaluation-service`
    * **Runtime:** Select **Docker**.
