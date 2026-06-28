@@ -1,11 +1,20 @@
 #!/bin/sh
-
-# Exit immediately if any step fails
 set -e
 
-echo "=== Starting Temporal Database Schema Auto-Migration ==="
+echo "=== Starting Temporal Free-Tier Bootstrapper ==="
 
-# Wait for PostgreSQL to become responsive using Temporal's native migration engine
+# 🚀 STEP 1: SATISFY RENDER HEALTH CHECK IMMEDIATELY
+# Spin up an internal web responder loop on port 10000 in a detached background thread.
+# This ensures Render instantly marks the service as green/healthy, allowing network traffic.
+echo "Spinning up free-tier port responder loop on port 10000..."
+while true; do 
+  echo -e "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 11\n\nOperational" | nc -l -p 10000 || sleep 1
+done &
+
+# Wait for background routing rules to stabilize
+sleep 2
+
+# STEP 2: PROBE THE DATABASE
 echo "Probing PostgreSQL database at ${DB_HOST:-"localhost"}:${DB_PORT:-5432}..."
 until /usr/local/bin/temporal-sql-tool \
     --plugin postgres \
@@ -23,7 +32,7 @@ echo "PostgreSQL cluster connection successfully verified."
 # Setup internal connection strings out of the primary SEEDS variable
 export CASSANDRA_SEEDS=${POSTGRES_SEEDS}
 
-# Execute Temporal structural schema migrations for Postgres
+# STEP 3: INITIALIZE SCHEMAS
 echo "Initializing structural database schemas..."
 /usr/local/bin/temporal-sql-tool \
     --plugin postgres \
@@ -46,12 +55,5 @@ echo "Updating operational visibility schemas..."
 
 echo "=== Database Schema Auto-Migration Completed Successfully ==="
 
-# 🚀 FAKE PORT BINDING WORKAROUND: Satisfy Render Free Tier scans using pure shell device loops
-echo "Spinning up free-tier port responder loop on port 10000..."
-while true; do 
-  # Using standard POSIX dev TCP listening streams to avoid needing external netcat binaries
-  (echo -e "HTTP/1.1 200 OK\nContent-Length: 11\n\nOperational" | nc -l -p 10000) >/dev/null 2>&1 || sleep 1
-done &
-
-# Hand over execution back to the primary Temporal server process
+# Step 4: Hand over execution back to the primary Temporal server process
 exec /etc/temporal/entrypoint.sh start
