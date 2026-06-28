@@ -3,9 +3,6 @@ FROM temporalio/server:1.24.2
 
 USER root
 
-# Install standard netcat for handling Render free-tier port scans
-RUN apt-get update && apt-get install -y netcat-openbsd && rm -rf /var/lib/apt/lists/*
-
 # Copy the migration bootstrapper script into the container workspace
 COPY schema-migration.sh /usr/local/bin/schema-migration.sh
 
