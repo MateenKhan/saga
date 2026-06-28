@@ -5,14 +5,20 @@ set -e
 
 echo "=== Starting Temporal Database Schema Auto-Migration ==="
 
-# Wait for PostgreSQL to become responsive using standard shell device descriptors
-echo "Waiting for PostgreSQL database to be reachable..."
-# We test connection directly using standard dev TCP sockets built into sh/bash
-until (echo > /dev/tcp/${DB_HOST:-"localhost"}/${DB_PORT:-5432}) >/dev/null 2>&1; do
-  echo "PostgreSQL is unavailable - sleeping for 2 seconds..."
-  sleep 2
+# Wait for PostgreSQL to become responsive using Temporal's native migration engine
+echo "Probing PostgreSQL database at ${DB_HOST:-"localhost"}:${DB_PORT:-5432}..."
+until /usr/local/bin/temporal-sql-tool \
+    --plugin postgres \
+    --endpoint ${DB_HOST:-"localhost"} \
+    --port ${DB_PORT:-5432} \
+    --user ${DB_USER} \
+    --password ${DB_PWD} \
+    --database "postgres" \
+    list-databases >/dev/null 2>&1; do
+  echo "PostgreSQL port is not responding yet - sleeping for 3 seconds..."
+  sleep 3
 done
-echo "PostgreSQL connection successfully established."
+echo "PostgreSQL cluster connection successfully verified."
 
 # Setup internal connection strings out of the primary SEEDS variable
 export CASSANDRA_SEEDS=${POSTGRES_SEEDS}
