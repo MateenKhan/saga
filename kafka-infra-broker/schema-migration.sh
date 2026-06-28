@@ -14,4 +14,5 @@ sleep 2
 
 # STEP 2: HAND OVER EXECUTION TO THE PRIMARY KAFKA APP ENGINES
 echo "Launching Apache Kafka daemon loop..."
-exec /opt/kafka/bin/launch
+exec /etc/kafka/docker/launch
+
