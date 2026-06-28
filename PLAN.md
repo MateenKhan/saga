@@ -50,7 +50,7 @@ Execute these steps before setting up your infrastructure or writing code.
 *  **Name** = `kafka-cluster-broker`
    * **Root Directory** = `kafka-cluster-broker`
    * **Dockerfile Path** = `Dockerfile`
-5. Click **Create Web Service**.
+4. Click **Create Web Service**.
 
 ### ☕ Step 4: Boot the Java Spring Boot Processing Engine
 1. Click **New +** on the dashboard and select **Web Service**.
@@ -59,9 +59,12 @@ Execute these steps before setting up your infrastructure or writing code.
    * **Name:** `fraud-evaluation-service`
    * **Runtime:** Select **Docker**.
    * **Instance Type:** Select **Free**.
+   * **Advanced -> Dockerfile Path:** Select **Dockerfile**.
 4. Open **Environment Variables** and add:
    * `KAFKA_BOOTSTRAP_SERVERS` = `kafka-cluster-broker:9042`
    * `TEMPORAL_SERVER_ADDRESS` = `temporal-central-server:7233`
+   * `DB_URL` = `jdbc:postgresql://dpg-d909ol8k1i2s73ffl560-`
+   
 5. Click **Create Web Service**.
 
 ---

@@ -3,6 +3,9 @@ FROM temporalio/server:1.24.2
 
 USER root
 
+# 👑 FIX: Utilizing Alpine's native package manager to securely inject netcat
+RUN apk update && apk add --no-cache netcat-openbsd
+
 # Copy the migration bootstrapper script into the container workspace
 COPY schema-migration.sh /usr/local/bin/schema-migration.sh
 

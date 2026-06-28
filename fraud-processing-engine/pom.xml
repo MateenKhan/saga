@@ -8,7 +8,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.3.1</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/> 
     </parent>
 
     <groupId>com.enterprise.architecture</groupId>
@@ -24,26 +24,33 @@
     </properties>
 
     <dependencies>
-        <!-- Spring Boot Web Core Ingestion Core -->
+        <!-- Spring Boot Web Ingestion Core -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- Spring Boot High-Volume Streaming Pipeline Ingest -->
+        <!-- Corrected Spring-Kafka Stream Processing Engine -->
         <dependency>
             <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-spring-kafka</artifactId>
+            <artifactId>spring-kafka</artifactId>
         </dependency>
 
-        <!-- Orchestration Workflow Orchestrator Brain -->
+        <!-- 👑 FIX: Added the PostgreSQL JDBC Driver with Runtime scoping -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Orchestration Workflow Engine -->
         <dependency>
             <groupId>io.temporal</groupId>
             <artifactId>temporal-sdk</artifactId>
             <version>${temporal.version}</version>
         </dependency>
 
-        <!-- Fault Tolerance Boundaries (Circuit Breakers & Rate Limiters) -->
+        <!-- Backpressure Fault Tolerance Boundaries -->
         <dependency>
             <groupId>io.github.resilience4j</groupId>
             <artifactId>resilience4j-spring-boot3</artifactId>
@@ -54,7 +61,7 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
-        <!-- Observability Lane (Micrometer + OpenTelemetry Percentile Engine) -->
+        <!-- Observability Metrics Core -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -67,12 +74,14 @@
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-tracing-bridge-otel</artifactId>
         </dependency>
+
+        <!-- Corrected OpenTelemetry dependency mapping -->
         <dependency>
-            <groupId>io.optelemetry</groupId>
-            <artifactId>optelemetry-exporter-otlp</artifactId>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-otlp</artifactId>
         </dependency>
 
-        <!-- Runtime Testing Foundations -->
+        <!-- Runtime Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -82,7 +91,6 @@
 
     <build>
         <plugins>
-            <!-- Standard Spring Boot Compiler Packing Engine Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

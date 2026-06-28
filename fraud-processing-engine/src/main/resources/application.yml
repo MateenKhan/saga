@@ -2,26 +2,25 @@ spring:
   application:
     name: fraud-processing-engine
   
-  # Kafka Consumer Connection Targets
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka-cluster-broker:9042}
-
-# Custom Architecture Variables Injected from Render
-temporal:
-  server-address: ${TEMPORAL_SERVER_ADDRESS:temporal-central-server:7233}
-  task-queue: "order-saga-queue"
-
-# Resilient Hikari Database Connection Ceiling Tune
-database:
+  # 👑 FIX: Relocating configuration blocks under Spring's active auto-config prefix
   datasource:
-    url: ${DB_URL} # Provided via your Render PostgreSQL internal mesh string
+    url: ${DB_URL}
     username: ${DB_USER:postgres}
     password: ${DB_PWD}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 5  # Clamped defense boundary to prevent database saturation crashes
-      connection-timeout: 3000 # 3 seconds max wait boundary
+      maximum-pool-size: 5         # Protection ceiling against connection leaks
+      connection-timeout: 3000     # 3 seconds timeout
       minimum-idle: 2
+
+  # Kafka Consumer Connection Targets
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka-cluster-broker:9042}
+
+# Custom Application Properties
+temporal:
+  server-address: ${TEMPORAL_SERVER_ADDRESS:temporal-central-server:7233}
+  task-queue: "order-saga-queue"
 
 # Observability Lane Metrics Routing
 management:

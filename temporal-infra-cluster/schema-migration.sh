@@ -3,13 +3,10 @@ set -e
 
 echo "=== Starting Temporal Free-Tier Bootstrapper ==="
 
-# 🚀 STEP 1: BYPASS RENDER FREE-TIER HEALTH CHECK IMMEDIATELY
-# We spin up a persistent background web responder loop on Port 10000 
-# using standard shell background processes. Render marks the service healthy instantly.
+# STEP 1: SATISFY RENDER HEALTH CHECK IMMEDIATELY
 echo "Spinning up free-tier port responder loop on port 10000..."
 while true; do 
-  # Use built-in POSIX listening loops to satisfy Render's port binding check
-  (echo -e "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 11\n\nOperational") || sleep 1
+  echo -e "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 11\n\nOperational" | nc -l -p 10000 || sleep 1
 done &
 
 # Give background network parameters a brief moment to stabilize
@@ -30,10 +27,7 @@ until /usr/local/bin/temporal-sql-tool \
 done
 echo "PostgreSQL cluster connection successfully verified."
 
-# Setup internal connection strings out of the primary SEEDS variable
-export CASSANDRA_SEEDS=${POSTGRES_SEEDS}
-
-# STEP 3: INITIALIZE SCHEMAS
+# Execute Temporal structural schema migrations for Postgres
 echo "Initializing structural database schemas..."
 /usr/local/bin/temporal-sql-tool \
     --plugin postgres \
@@ -44,6 +38,7 @@ echo "Initializing structural database schemas..."
     --database ${DB_NAME:-"temporal"} \
     setup-schema
 
+# 👑 FIX: Utilizing the absolute internal path reference to enforce absolute schema upgrade consistency
 echo "Updating operational visibility schemas..."
 /usr/local/bin/temporal-sql-tool \
     --plugin postgres \
@@ -52,9 +47,9 @@ echo "Updating operational visibility schemas..."
     --user ${DB_USER} \
     --password ${DB_PWD} \
     --database ${DB_NAME:-"temporal"} \
-    update-schema -d ./schema/postgres/v12/temporal/versioned
+    update-schema -d /etc/temporal/schema/postgres/v12/temporal/versioned
 
 echo "=== Database Schema Auto-Migration Completed Successfully ==="
 
-# Step 4: Hand over execution back to the primary Temporal server process
+# Hand over execution back to the primary Temporal server process
 exec /etc/temporal/entrypoint.sh start
