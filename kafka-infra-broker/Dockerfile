@@ -1,7 +1,35 @@
-# Use the official, highly-optimized minimal Apache Kafka image
+# ===================================================
+# STAGE 1: COMPILE THE JAVA HEALTH CHECK RESPONDER
+# ===================================================
+FROM eclipse-temurin:21-jdk-alpine AS builder
+WORKDIR /app
+RUN echo 'import com.sun.net.httpserver.HttpServer; \
+import java.net.InetSocketAddress; \
+import java.io.OutputStream; \
+public class RenderHealth { \
+    public static void main(String[] args) throws Exception { \
+        HttpServer server = HttpServer.create(new InetSocketAddress(10000), 0); \
+        server.createContext("/", exchange -> { \
+            byte[] response = "Operational".getBytes(); \
+            exchange.sendResponseHeaders(200, response.length); \
+            try (OutputStream os = exchange.getResponseBody()) { \
+                os.write(response); \
+            } \
+        }); \
+        server.start(); \
+    } \
+}' > RenderHealth.java
+RUN javac RenderHealth.java
+
+# ===================================================
+# STAGE 2: PRODUCTION RUNTIME ENVIRONMENT
+# ===================================================
 FROM apache/kafka:3.7.0
 
 USER root
+
+# Copy the pre-compiled Java Health Responder class directly into classpath
+COPY --from=builder /app/RenderHealth.class /usr/local/bin/RenderHealth.class
 
 # Copy the execution script into the container workspace
 COPY schema-migration.sh /usr/local/bin/schema-migration.sh
@@ -23,7 +51,7 @@ ENV KAFKA_PROCESS_ROLES=broker,controller
 ENV KAFKA_CONTROLLER_QUORUM_VOTERS=1@localhost:9093
 ENV KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
 
-# Bind Kafka's listeners explicitly to your Render internal network space
+# Bind Kafka's listeners explicitly to your Render internal private network space
 ENV KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9042,CONTROLLER://0.0.0.0:9093
 ENV KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka-cluster-broker:9042
 ENV KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
