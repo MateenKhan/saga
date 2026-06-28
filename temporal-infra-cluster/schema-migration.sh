@@ -5,9 +5,10 @@ set -e
 
 echo "=== Starting Temporal Database Schema Auto-Migration ==="
 
-# Wait for PostgreSQL to become responsive within the private network
+# Wait for PostgreSQL to become responsive using standard shell device descriptors
 echo "Waiting for PostgreSQL database to be reachable..."
-until nc -z -v -w30 ${DB_HOST:-"localhost"} ${DB_PORT:-5432}; do
+# We test connection directly using standard dev TCP sockets built into sh/bash
+until (echo > /dev/tcp/${DB_HOST:-"localhost"}/${DB_PORT:-5432}) >/dev/null 2>&1; do
   echo "PostgreSQL is unavailable - sleeping for 2 seconds..."
   sleep 2
 done

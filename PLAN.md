@@ -4,59 +4,14 @@ This master runbook outlines the exact sequence to register, configure, structur
 
 ---
 
-## 🧭 PHASE 1: External Platform Registrations
+## 🧭 STEP 1: External Platform Registrations
 Execute these steps before setting up your infrastructure or writing code.
 
-1. **GitHub Account Setup:**
-   * Go to [github.com](https://github.com) and register a free developer account.
-   * Create **Repository 1**: Name it `fraud-processing-engine` (Mark as Private or Public).
-   * Create **Repository 2**: Name it `temporal-infra-cluster` (Mark as Private or Public).
-2. **Render Account Setup:**
    * Go to [render.com](https://render.com) and click **Sign Up**.
-   * Select **Sign up with GitHub** to link your source code repository permissions automatically.
+   * Fork this repo and to link this repo to your render account.
 
 ---
-
-## 📁 PHASE 2: Codebase Directory Trees & File Enclosures
-Create the exact folder structures and file headers inside your local workspace repositories before provisioning resources.
-
-### Repository 1: `fraud-processing-engine`
-```text
-fraud-processing-engine/
-├── pom.xml                                   # Dependency Management Descriptor
-├── Dockerfile                                # Multi-Stage Production Java Compiler
-└── src/
-    └── main/
-        └── java/
-            └── com/
-                └── enterprise/
-                    └── architecture/
-                        ├── config/
-                        │   └── KafkaConsumerConfig.java     # Project Loom Thread Config
-                        ├── security/
-                        │   ├── EncryptionUtil.java          # AES-256 GCM Logic Core
-                        │   └── TemporalDataConverter.java   # Cryptographic Payload Interceptor
-                        ├── components/
-                        │   └── FraudValidationProcessor.java# Resilience4j Consumer Listener
-                        └── saga/
-                            ├── OrderSagaWorkflow.java       # Orchestrated Workflow Interface
-                            ├── OrderSagaWorkflowImpl.java   # Deterministic Replay Logic
-                            ├── InventoryActivities.java     # Task Execution Interface
-                            └── InventoryActivitiesImpl.java # Idempotency State Execution
-```
-
-### Repository 2: `temporal-infra-cluster`
-```text
-temporal-infra-cluster/
-├── Dockerfile                                # Pre-compiled Temporal Engine Puller
-└── schema-migration.sh                       # PostgreSQL Database Table Bootstrapper
-```
-
----
-
-## 🛠️ PHASE 3: Step-by-Step Cloud Environment Provisioning
-
-### 🗄️ Step 1: Deploy the Shared Persistence Layer (PostgreSQL)
+### 🗄️ Step 2: Deploy the Shared Persistence Layer (PostgreSQL)
 1. Navigate to your **Render Dashboard**, click **New +** in the top right, and select **PostgreSQL**.
 2. Input the exact values:
    * **Name:** `temporal-persistence-db`
@@ -66,7 +21,9 @@ temporal-infra-cluster/
 3. Click **Create Database**.
 4. Wait for status **Available**. Scroll down to **Connections** and copy the value for **Internal Database URL**.
 
-### ⏱️ Step 2: Provision the Central Temporal Orchestrator Server
+---
+
+### ⏱️ Step 3: Provision the Central Temporal Orchestrator Server
 1. Click **New +** on the Render dashboard and select **Web Service**.
 2. Select your linked **`temporal-infra-cluster`** repository.
 3. Input the parameters:
@@ -75,7 +32,10 @@ temporal-infra-cluster/
    * **Instance Type:** Select **Free**.
 4. Open **Environment Variables** and add:
    * `DB` = `postgres`
-   * `POSTGRES_SEEDS` = `[Paste the Internal Database URL copied in Step 1]`
+   * `DB_HOST` = `[Paste your Internal Database Hostname]`
+   * `DB_PORT` = `5432`
+   * `DB_USER` = `temporal_admin`
+   * `DB_PWD` = `[Paste your Database Password]`
 5. Click **Create Web Service**.
 
 ### ⚡ Step 3: Deploy the Stream Pipeline (Apache Kafka)
