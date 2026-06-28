@@ -1,11 +1,18 @@
 package com.enterprise.architecture.saga;
 
+import io.temporal.workflow.WorkflowInterface;
+import io.temporal.workflow.WorkflowMethod;
+
 /**
- * OrderSagaWorkflow - Orchestrated Workflow Interface
- * 
- * Purpose: Decoupled business interface descriptor required by the Temporal compiler
- * to safely build workflow proxy stubs.
+ * Top-level Orchestrator interface defining the core transaction sequence
+ * boundary.
  */
+@WorkflowInterface
 public interface OrderSagaWorkflow {
-    // Workflow method definitions to be added
+
+    /**
+     * Master entrypoint to execute our high-throughput distributed transaction.
+     */
+    @WorkflowMethod
+    void executeOrderSaga(String orderId, String customerId, int itemId, int quantity);
 }

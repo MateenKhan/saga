@@ -1,0 +1,29 @@
+# Target Build Binaries and Compiled Outputs
+**/target/
+**/*.class
+**/*.jar
+**/*.war
+**/*.ear
+
+# JetBrains IntelliJ Project Workspace Layers
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# Eclipse IDE Configuration Metadata
+.metadata/
+.classpath
+.project
+.settings/
+*.launch
+
+# Operating System Temporary Memory Files
+Thumbs.db
+.DS_Store
+
+# Hidden Local Application Profiler Properties
+**/application-local.yml
+**/application-dev.yml
+.env

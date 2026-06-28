@@ -36,18 +36,20 @@ Execute these steps before setting up your infrastructure or writing code.
    * `DB_PORT` = `5432`
    * `DB_USER` = `temporal_admin`
    * `DB_PWD` = `[Paste your Database Password]`
+4. Open **Settings** and edit:
+   * **Name** = `temporal-central-server`
+   * **Root Directory** = `temporal-infra-cluster`
+   * **Dockerfile Path** = `temporal-infra-cluster/Dockerfile`
+   * **Docker Build Context Directory** = `temporal-infra-cluster/.`
 5. Click **Create Web Service**.
 
 ### ⚡ Step 3: Deploy the Stream Pipeline (Apache Kafka)
 1. Click **New +** on the dashboard and select **Web Service**.
 2. Select **Build from a Docker Image** and type: `ubuntu/kafka:latest`
 3. Input the parameters:
-   * **Name:** `kafka-cluster-broker`
-   * **Instance Type:** Select **Free**.
-4. Open **Environment Variables** and add:
-   * `KAFKA_LISTENER_SECURITY_PROTOCOL_MAP` = `INTERNAL:PLAINTEXT`
-   * `KAFKA_LISTENERS` = `INTERNAL://0.0.0.0:9042`
-   * `KAFKA_ADVERTISED_LISTENERS` = `INTERNAL://kafka-cluster-broker:9042`
+*  **Name** = `kafka-cluster-broker`
+   * **Root Directory** = `kafka-cluster-broker`
+   * **Dockerfile Path** = `Dockerfile`
 5. Click **Create Web Service**.
 
 ### ☕ Step 4: Boot the Java Spring Boot Processing Engine

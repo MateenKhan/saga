@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: fraud-processing-engine
+  
+  # Kafka Consumer Connection Targets
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka-cluster-broker:9042}
+
+# Custom Architecture Variables Injected from Render
+temporal:
+  server-address: ${TEMPORAL_SERVER_ADDRESS:temporal-central-server:7233}
+  task-queue: "order-saga-queue"
+
+# Resilient Hikari Database Connection Ceiling Tune
+database:
+  datasource:
+    url: ${DB_URL} # Provided via your Render PostgreSQL internal mesh string
+    username: ${DB_USER:postgres}
+    password: ${DB_PWD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5  # Clamped defense boundary to prevent database saturation crashes
+      connection-timeout: 3000 # 3 seconds max wait boundary
+      minimum-idle: 2
+
+# Observability Lane Metrics Routing
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus,metrics,health"
+  metrics:
+    distribution:
+      percentiles-enabled:
+        http.server.requests: true
+        kafka.listener.stream: true
+      percentiles:
+        http.server.requests: 0.5, 0.99, 0.999
+        kafka.listener.stream: 0.5, 0.99, 0.999

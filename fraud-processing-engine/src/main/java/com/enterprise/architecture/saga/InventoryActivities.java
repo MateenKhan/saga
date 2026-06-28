@@ -1,11 +1,25 @@
 package com.enterprise.architecture.saga;
 
+import io.temporal.activity.ActivityInterface;
+import io.temporal.activity.ActivityMethod;
+
 /**
- * InventoryActivities - Task Execution Interface
- * 
- * Purpose: Decoupled activity interface descriptor required by the Temporal compiler
- * to safely build activity proxy stubs.
+ * Interface defining individual microservice network activities managed by the
+ * Saga.
  */
+@ActivityInterface
 public interface InventoryActivities {
-    // Activity method definitions (e.g. reserve, release) to be added
+
+    /**
+     * Deducts item stock from the sharded database inventory tables.
+     */
+    @ActivityMethod
+    void reserveInventory(String orderId, int itemId, int quantity);
+
+    /**
+     * COMPENSATING TRANSACTION: Reverts inventory adjustments if subsequent steps
+     * fail.
+     */
+    @ActivityMethod
+    void compensateInventory(String orderId, int itemId, int quantity);
 }
